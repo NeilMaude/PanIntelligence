@@ -262,7 +262,7 @@ update zTempPanAnalysis Set CallMinutes = DATEDIFF(n,
 												and incidentId = zTempPanAnalysis.Incident),
 			(select min(createdDateTime) from incidenttransaction 
 												where activityCodeId = 'LEAVE'
-												and incidentId = zTempPanAnalysis.Incident))
+												and incidentId = zTempPanAnalysis.Incident and createdDateTime > zTempPanAnalysis.AttendDateTime))
 GO
 
 -- Working time minutes, creation to first on-site
@@ -271,7 +271,7 @@ update zTempPanAnalysis Set MinutesToAttend = dbo.WorkTime(
 			zTempPanAnalysis.CreatedDateTime,
 			(select min(createdDateTime) from incidenttransaction 
 												where activityCodeId = 'ONSITE'
-												and incidentId = zTempPanAnalysis.Incident),
+												and incidentId = zTempPanAnalysis.Incident and createdDateTime > zTempPanAnalysis.CreatedDateTime),
 			'08:00', '17:00') / 60
 GO
 
