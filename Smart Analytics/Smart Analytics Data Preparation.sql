@@ -26,6 +26,8 @@ BEGIN
 	
 	ALTER TABLE [dbo].[zCALL_ANALYSIS_LOG] ADD  CONSTRAINT [DF_zCALL_ANALYSIS_LOG_DateTime]  DEFAULT (getdate()) FOR [DateTime]
 
+	GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[zCALL_ANALYSIS_LOG] To ReportsReader			-- Needed for logging in the Python code...
+
 END
 GO
 
@@ -95,8 +97,8 @@ CREATE TABLE [dbo].[zCALL_ANALYSIS](
 	[PostCodeArea] [varchar](10) NULL,
 	[FirstEngineer] [varchar](50) NULL,
 	[SymptomCodeId] [varchar](50) NULL,
-	[SymptomDescription] [varchar](500) NULL
-
+	[SymptomDescription] [varchar](500) NULL,
+	[Repeated] [varchar](10) NULL
 ) ON [PRIMARY]
 GO
 
@@ -481,6 +483,28 @@ delete from zCALL_ANALYSIS where IsNull(AttendDateTime,'') = ''
 update zCALL_ANALYSIS set SymptomCodeId = 'ZZ' where IsNull(SymptomCodeId,'') = ''
 delete from zCALL_ANALYSIS where AttendDateTime < '31-Dec-1999'							-- 2 random rows with 1967 site attendance dates...
 update zCALL_ANALYSIS set SymptomDescription = 'UNKNOWN' where IsNull(SymptomDescription,'') = ''
+
+-- Finally, update the 'Repeated' status
+UPDATE zCALL_ANALYSIS Set Repeated = CAST(
+									(select count(*) from dbo.incident 
+										where 
+											incident.customerId = zCALL_ANALYSIS.CustomerId
+											and
+											incident.productId = zCALL_ANALYSIS.ProductId
+											and 
+											incident.serial = zCALL_ANALYSIS.SerialNo
+											and
+											incident.createdDateTime > zCALL_ANALYSIS.AttendDateTime
+											and
+											incident.createdDateTime < DATEADD(d,14,zCALL_ANALYSIS.AttendDateTime)
+											and
+											incident.incidentId <> zCALL_ANALYSIS.Incident
+											and
+											incident.incidentTypeId in ('RTF', 'RTD', 'BREAKDOWN', 'REPEAT'))
+									As varchar(30))
+UPDATE zCALL_ANALYSIS Set Repeated = 'YES' Where Repeated <> '0'
+UPDATE zCALL_ANALYSIS Set Repeated = 'NO' Where Repeated = '0'
+UPDATE zCALL_ANALYSIS Set Repeated = 'MAYBE' Where Repeated = 'NO' and CreatedDateTime > DATEADD(d,-14,getdate())
 
 INSERT INTO [dbo].[zCALL_ANALYSIS_LOG] ([Description]) VALUES ('End data extract process')
 
