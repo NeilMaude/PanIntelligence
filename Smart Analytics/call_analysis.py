@@ -85,7 +85,8 @@ def run_analysis(username, password):
         df_all = df_all.join(one_hot)
     print('Now have %s rows, with %s columns' % (df_all.shape[0], df_all.shape[1]))
     # Extract the ground-truth values
-    y_repeat = df_all['IncidentType'].map(lambda x: x == 'REPEAT')
+    #y_repeat = df_all['IncidentType'].map(lambda x: x == 'REPEAT')
+    y_repeat = df_all['Repeated'].map(lambda x: x == 'YES')
 
     # Find the point at which predictions required (i.e recent incidents)
     sql = 'select MIN(Incident) [MinIncident] from zCALL_ANALYSIS '
