@@ -175,7 +175,7 @@ select
 
 	from dbo.incident 
 
-	where incidentTypeId in ('RTF', 'RTD', 'BREAKDOWN', 'REPEAT') and lastActivity = 'CLOSED'
+	where incidentTypeId in ('RTF', 'RTD', 'BREAKDOWN', 'REPEAT') and lastActivity = 'CLOSED' and serial <> 'UNKNOWN' and productId <> 'NSFCHECK'
 GO
 
 PRINT N'Main data fields copied.'
