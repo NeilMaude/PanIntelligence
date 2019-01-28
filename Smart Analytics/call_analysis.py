@@ -180,7 +180,8 @@ def build_model(X_model, y_model):
     nn_model.add(Dense(X_model.shape[1], input_shape=(X_model.shape[1] * 1,)))
     nn_model.add(Activation('relu'))
     nn_model.add(Dropout(0.5))
-    nn_model.add(Dense(1000))
+    #nn_model.add(Dense(1000))
+    nn_model.add(Dense(800))                # down-size to fit in GPU memory
     nn_model.add(Activation('relu'))
     nn_model.add(Dense(200))
     nn_model.add(Activation('relu'))
@@ -265,7 +266,7 @@ def predict_calls(nn_model, X_predict, y_predict, Incident_predict, predictdate,
 # Determine threshold to use, with some ratio of true positives to false positives
 def find_threshold(nn_model, X_threshold, y_threshold):
 
-    required_ratio = 4.0        # TP to FP ratio
+    required_ratio = 2.0        # TP to FP ratio - have tried 5:1 and 4:1
     best_threshold_value = 0.0
     best_ratio = 0.0
     f_found_solution = False
