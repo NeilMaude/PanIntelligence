@@ -15,8 +15,6 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-
 CREATE VIEW [ReportsReader].[PI_Consumables2] AS
 SELECT
 	i.incidentId,
@@ -26,6 +24,8 @@ SELECT
 	i.createdDateTime,
 	so.productId,
 	so.quantity,
+	p.standardCost,
+	CAST(ROUND(so.quantity * p.standardCost,2) as DECIMAL(10,2)) [order_value],			-- this makes the query slow...
 	p.description,
 	so.despatchedDateTime,
 	cast(year(d.despatchDate) as varchar) + '-' + RIGHT('00'+cast(month(d.despatchDate) as varchar),2) [DespatchPeriod],
